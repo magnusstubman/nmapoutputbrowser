@@ -40,17 +40,17 @@ optional arguments:
 ### Example usage
 
 ```
-[~] ./nmapoutputbrowser.py scan1.xml
+$ ./nmapoutputbrowser.py scan1.xml
 21/tcp
 554/tcp
 7070/tcp
-[~] ./nmapoutputbrowser.py scan1.xml scan2.xml 
+$ ./nmapoutputbrowser.py scan1.xml scan2.xml 
 21/tcp
 80/tcp
 554/tcp
 7070/tcp
 8000/tcp
-[~] ./nmapoutputbrowser.py scan1.xml scan2.xml -v
+$ ./nmapoutputbrowser.py scan1.xml scan2.xml -v
 21/tcp
 |  192.168.87.149 ftp
 |  192.168.86.1 tcpwrapped
@@ -67,7 +67,7 @@ optional arguments:
 |  192.168.86.4 realserver
 8000/tcp
 |  192.168.86.4 http-alt
-[~] ./nmapoutputbrowser.py scan1.xml scan2.xml -vv
+$ ./nmapoutputbrowser.py scan1.xml scan2.xml -vv
 21/tcp
 |  192.168.87.149 ftp
 |  192.168.86.1 tcpwrapped
@@ -91,7 +91,7 @@ optional arguments:
 |  192.168.86.4 realserver
 8000/tcp
 |  192.168.86.4 http-alt
-[~] ./nmapoutputbrowser.py scan1.xml scan2.xml -vv -ss tcpwrapped -ss ftp
+$ ./nmapoutputbrowser.py scan1.xml scan2.xml -vv -ss tcpwrapped -ss ftp
 80/tcp
 |  192.168.86.4 http
 |    http-favicon: Unknown favicon MD5: 89B932FCC47CF4CA3FAADB0CFDEF89CF
@@ -108,7 +108,7 @@ optional arguments:
 |  192.168.86.4 realserver
 8000/tcp
 |  192.168.86.4 http-alt
-[~] ./nmapoutputbrowser.py scan1.xml scan2.xml -vv -it -ss ftp -spr 1000-65535
+$ ./nmapoutputbrowser.py scan1.xml scan2.xml -vv -it -ss ftp -spr 1000-65535
 80/tcp
 |  192.168.86.4 http
 |    http-favicon: Unknown favicon MD5: 89B932FCC47CF4CA3FAADB0CFDEF89CF
