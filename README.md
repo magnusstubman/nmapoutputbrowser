@@ -1,7 +1,13 @@
 # nmapoutputbrowser.py
 
-nmapoutputbrowser.py (NOB) parses nmap XML output files and displays a sorted list of open ports. `-v` shows which IPs had ports open and `-vv` shows script scan output.
+nmapoutputbrowser.py (NOB) was developed during a red team engagement, where different parts of the network was scanned by different hosts using different scan options and techniques, and we wanted to get a clear overview of discovered ports/services in order to prioritize and choose targets for further exploitation.
+
+
+NOB parses nmap XML output files and displays a sorted list of open ports. `-v` shows which IPs had ports open and `-vv` shows script scan output.
 NOB is usefull when you focus on services and ports, and less on hosts. NOB is great for getting an overview of a network, especially since NOB can parse multiple XML files at once.
+
+
+Pull requests are welcome.
 
 ```
 usage: nmapoutputbrowser.py [-h] [-v] [-it] [-sp SILENT_PORT]
