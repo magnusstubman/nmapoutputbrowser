@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/local/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.60 scan initiated Tue Sep  5 21:43:04 2017 as: nmap -oX random2 -F -n -vv -&#45;open -sV -sC 220.248.86.0/29 -->
+<nmaprun scanner="nmap" args="nmap -oX random2 -F -n -vv -&#45;open -sV -sC 220.248.86.0/29" start="1504640584" startstr="Tue Sep  5 21:43:04 2017" version="7.60" xmloutputversion="1.04">
+<scaninfo type="connect" protocol="tcp" numservices="100" services="7,9,13,21-23,25-26,37,53,79-81,88,106,110-111,113,119,135,139,143-144,179,199,389,427,443-445,465,513-515,543-544,548,554,587,631,646,873,990,993,995,1025-1029,1110,1433,1720,1723,1755,1900,2000-2001,2049,2121,2717,3000,3128,3306,3389,3986,4899,5000,5009,5051,5060,5101,5190,5357,5432,5631,5666,5800,5900,6000-6001,6646,7070,8000,8008-8009,8080-8081,8443,8888,9100,9999-10000,32768,49152-49157"/>
+<verbose level="2"/>
+<debugging level="0"/>
+<taskbegin task="NSE" time="1504640584"/>
+<taskend task="NSE" time="1504640584"/>
+<taskbegin task="NSE" time="1504640584"/>
+<taskend task="NSE" time="1504640584"/>
+<taskbegin task="Ping Scan" time="1504640584"/>
+<taskend task="Ping Scan" time="1504640588" extrainfo="8 total hosts"/>
+<taskbegin task="Connect Scan" time="1504640588"/>
+<taskend task="Connect Scan" time="1504640597" extrainfo="200 total ports"/>
+<taskbegin task="Service scan" time="1504640597"/>
+<taskprogress task="Service scan" time="1504640744" percent="75.00" remaining="50" etc="1504640793"/>
+<taskend task="Service scan" time="1504640760" extrainfo="8 services on 2 hosts"/>
+<taskbegin task="NSE" time="1504640760"/>
+<taskprogress task="NSE" time="1504640791" percent="99.54" remaining="1" etc="1504640791"/>
+<taskend task="NSE" time="1504640795"/>
+<taskbegin task="NSE" time="1504640795"/>
+<taskend task="NSE" time="1504640798"/>
+<host starttime="1504640584" endtime="1504640795"><status state="up" reason="conn-refused" reason_ttl="0"/>
+<address addr="220.248.86.1" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<ports><extraports state="closed" count="93">
+<extrareasons reason="conn-refused" count="93"/>
+</extraports>
+<extraports state="filtered" count="4">
+<extrareasons reason="no-responses" count="4"/>
+</extraports>
+<port protocol="tcp" portid="21"><state state="open" reason="syn-ack" reason_ttl="0"/><service name="tcpwrapped" method="probed" conf="8"/></port>
+<port protocol="tcp" portid="554"><state state="open" reason="syn-ack" reason_ttl="0"/><service name="tcpwrapped" method="probed" conf="8"/></port>
+<port protocol="tcp" portid="7070"><state state="open" reason="syn-ack" reason_ttl="0"/><service name="tcpwrapped" method="probed" conf="8"/></port>
+</ports>
+<times srtt="358482" rttvar="29480" to="476402"/>
+</host>
+<host starttime="1504640584" endtime="1504640798"><status state="up" reason="syn-ack" reason_ttl="0"/>
+<address addr="220.248.86.4" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<ports><extraports state="filtered" count="95">
+<extrareasons reason="no-responses" count="95"/>
+</extraports>
+<port protocol="tcp" portid="21"><state state="open" reason="syn-ack" reason_ttl="0"/><service name="ftp" method="table" conf="3"/></port>
+<port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="0"/><service name="http" product="Hikvision Network Video Recorder http admin" devicetype="webcam" method="probed" conf="10"/><script id="http-favicon" output="Unknown favicon MD5: 89B932FCC47CF4CA3FAADB0CFDEF89CF"/><script id="http-methods" output="&#xa;  Supported Methods: OPTIONS GET HEAD POST PUT DELETE&#xa;  Potentially risky methods: PUT DELETE"><table key="Supported Methods">
+<elem>OPTIONS</elem>
+<elem>GET</elem>
+<elem>HEAD</elem>
+<elem>POST</elem>
+<elem>PUT</elem>
+<elem>DELETE</elem>
+</table>
+<table key="Potentially risky methods">
+<elem>PUT</elem>
+<elem>DELETE</elem>
+</table>
+</script><script id="http-server-header" output="DNVRS-Webs"><elem>DNVRS-Webs</elem>
+</script><script id="http-title" output="index"><elem key="title">index</elem>
+</script></port>
+<port protocol="tcp" portid="554"><state state="open" reason="syn-ack" reason_ttl="0"/><service name="rtsp" product="Apple AirTunes rtspd" ostype="Mac OS X" method="probed" conf="10"><cpe>cpe:/o:apple:mac_os_x</cpe></service><script id="rtsp-methods" output="ERROR: Script execution failed (use -d to debug)"/></port>
+<port protocol="tcp" portid="7070"><state state="open" reason="syn-ack" reason_ttl="0"/><service name="realserver" method="table" conf="3"/></port>
+<port protocol="tcp" portid="8000"><state state="open" reason="syn-ack" reason_ttl="0"/><service name="http-alt" method="table" conf="3"/></port>
+</ports>
+<times srtt="323991" rttvar="213656" to="1178615"/>
+</host>
+<taskbegin task="NSE" time="1504640798"/>
+<taskend task="NSE" time="1504640798"/>
+<taskbegin task="NSE" time="1504640798"/>
+<taskend task="NSE" time="1504640798"/>
+<runstats><finished time="1504640798" timestr="Tue Sep  5 21:46:38 2017" elapsed="215.14" summary="Nmap done at Tue Sep  5 21:46:38 2017; 8 IP addresses (2 hosts up) scanned in 215.14 seconds" exit="success"/><hosts up="2" down="6" total="8"/>
+</runstats>
+</nmaprun>
