@@ -122,3 +122,9 @@ $ ./nmapoutputbrowser.py scan1.xml scan2.xml -vv -it -ss ftp -spr 1000-65535
 |  192.168.86.4 rtsp
 |    rtsp-methods: ERROR: Script execution failed (use -d to debug)
 ```
+
+### Installation
+
+```
+pip install -r requirements.txt
+```
