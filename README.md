@@ -1,6 +1,7 @@
 # nmapoutputbrowser.py
 
 nmapoutputbrowser.py (NOB) was developed during a red team engagement, where different parts of the network was scanned by different hosts using different scan options and techniques, and we wanted to get a clear overview of discovered ports/services in order to prioritize and choose targets for further exploitation.
+
 In other words, this tool aims to help pentesters find and identify low-hanging fruits faster.
 
 NOB parses nmap XML output files and displays a sorted list of open ports. `-v` shows which IPs had ports open and `-vv` shows script scan output.
