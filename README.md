@@ -64,6 +64,9 @@ $ ./nmapoutputbrowser.py scan1.xml scan2.xml -vv
 8000/tcp
 |  192.168.86.4 http-alt
 $ ./nmapoutputbrowser.py scan1.xml scan2.xml -vv -ss tcpwrapped -ss ftp
+```
+
+```
 80/tcp
 |  192.168.86.4 http
 |    http-favicon: Unknown favicon MD5: 89B932FCC47CF4CA3FAADB0CFDEF89CF
