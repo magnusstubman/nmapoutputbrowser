@@ -113,7 +113,10 @@ for entry in theList:
             service = host.get_service(entry[0][0], entry[0][1])
             if not (not service.service and args.only_identified):
                 if not service.service in serviceIgnoreList:
-                    printI(1, host.address + " " + service.service)
+                    if len(service.banner) < 1:
+                        printI(1, host.address + " " + service.service)
+                    else:
+                        printI(1, host.address + " " + service.banner)
                     if args.verbose > 1:
                         scriptRes = service.scripts_results
                         for result in scriptRes:
