@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 import os
 import sys
@@ -37,6 +38,10 @@ def parseFile(filename):
     def appendAlreadySeenPort(port, host):
         for entry in theList:
             if entry[0] == port:
+                for h in entry[1]:
+                    if h.address == host.address:
+                        print(str(host.address) + " has already been seen to have port " + str(port) + " open! Skipping...")
+                        return
                 entry[1].append(host)
 
     def addNewPort(port, host):
@@ -58,7 +63,7 @@ def parseFile(filename):
 def printI(indentation, string):
     prefix = "|" + ("  " * indentation)
     string = string.replace("\n", "\n" + prefix)
-    print prefix + string
+    print(prefix + string)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", help="Increase verbosity - can be used twice", required=False, default=0, action='count')
@@ -90,7 +95,11 @@ if args.only_identified:
 
 # parse
 for entry in args.files:
-    parseFile(entry)
+#    try:
+        parseFile(entry)
+#    except:
+#        print(entry + " could not be parsed. Skipping file.", file=sys.stderr)
+#        pass
 
 # sort
 theList = sorted(theList, key=lambda tup: tup[0])
@@ -107,7 +116,7 @@ for entry in theList:
                     printPort = True
 
     if printPort:
-        print str(entry[0][0]) + "/" + entry[0][1]
+        print(str(entry[0][0]) + "/" + entry[0][1])
     if args.verbose > 0:
         for host in entry[1]:
             service = host.get_service(entry[0][0], entry[0][1])
