@@ -72,6 +72,8 @@ def parseFile(filename):
             addNewPort(port, host)
 
 def pprint_tree(node, file=None, _prefix="", _last=True, _first=False, something=False):
+  if not node:
+    return
   if not args.targets_only:
     if not node.value:
       node.value = ''
