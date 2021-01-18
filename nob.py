@@ -7,6 +7,11 @@ import sys
 import argparse
 from libnmap.parser import NmapParser
 
+
+def err(s):
+  print("[!] " + s, file=sys.stderr)
+  sys.exit(1)
+
 class c:
   HEADER = '\033[95m'
   OKBLUE = '\033[94m'
@@ -200,11 +205,41 @@ def printI(ind, string):
     for a in range(0,ind):
       o = o.children[len(o.children) - 1]
     o.children.append(Node(string))
+
+def parsePorts(s):
+  if not s:
+    return None
+
+  ports = []
+  def parse(part):
+    if part.isdigit():
+      if part not in ports:
+        ports.append(int(part))
+    else:
+      if '-' in part:
+        ps = part.split('-')
+        if len(ps) != 2:
+          err('your port range is messed up! Just look at this: ' + str(s))
+        for m in range(int(ps[0]), int(ps[1]) + 1):
+          if m not in ports:
+            ports.append(m)
+
+  for part in s:
+    for subpart in part.split(','):
+      parse(subpart)
+
+  return sorted(ports)
+
   
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", help="Increase verbosity - can be used twice", required=False, default=0, action='count')
 parser.add_argument("-it", "--ignore-tcpwrapped", help="hide ports which were found to be tcpwrapped. Default false", required=False, action='store_true', default=False)
+
+#parser.add_argument('-p', '--ports', metavar='P', type=int, nargs='+', help='ports to show')
+
+
+parser.add_argument("-p", "--ports", help="Only show specific ports", required=False, action='append')
 parser.add_argument("-ip", "--ignore-port", help="silence a specific port (protocol agnostic) from output - can be used multiple times", required=False, action='append')
 
 maxDifferentResults = 3
@@ -213,6 +248,8 @@ parser.add_argument("-ipr", "--ignore-port-range", help="silence a specific port
 parser.add_argument("-t", "--targets-only", help="hide everything but targets", required=False, action='store_true', default=False)
 parser.add_argument("files", metavar='<nmap XML file>', nargs='+', help='nmap XML file renerated with -oX or -oA of nmap')
 args = parser.parse_args()
+
+showPorts = parsePorts(args.ports)
 
 if args.ignore_port:
   for entry in args.ignore_port:
@@ -252,6 +289,10 @@ for entry in theList:
 
   portNumber = entry[0][0]
   portProtocol = entry[0][1]
+
+  if args.ports and portNumber not in showPorts:
+    continue
+
 
   if not first:
     pprint_tree(tree, None, '', True, True)
@@ -344,7 +385,12 @@ for entry in theList:
                   printI(2, str(text[0]) + ' result(s): ' + t)
             else:
               if len(serviceTexts) == 1:
-                printI(1, address + ' ' + serviceTexts[0][1])
+                #printI(1, address + ' ' + serviceTexts[0][1])
+                t = serviceTexts[0][1]
+                if t == 'tcpwrapped':
+                  printI(1, address + ' ' + c.DIM + t + c.ENDC)
+                else:
+                  printI(1, address + ' ' + serviceTexts[0][1])
               else:
                 printI(1, address)
                            
