@@ -211,22 +211,18 @@ def parsePorts(s):
     return None
 
   ports = []
-  def parse(part):
-    if part.isdigit():
-      if part not in ports:
-        ports.append(int(part))
-    else:
-      if '-' in part:
-        ps = part.split('-')
-        if len(ps) != 2:
-          err('your port range is messed up! Just look at this: ' + str(s))
-        for m in range(int(ps[0]), int(ps[1]) + 1):
-          if m not in ports:
-            ports.append(m)
 
-  for part in s:
-    for subpart in part.split(','):
-      parse(subpart)
+  for spart in s:
+    for part in spart.split(','):
+      if part.isdigit():
+        if part not in ports:
+          ports.append(int(part))
+      else:
+        if '-' in part:
+          ps = part.split('-')
+          if len(ps) != 2:
+            err('your port range is messed up! Just look at this: ' + str(s))
+          ports = ports + range(int(ps[0]), int(ps[1]) + 1)
 
   return sorted(ports)
 
