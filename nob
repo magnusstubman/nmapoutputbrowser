@@ -423,6 +423,40 @@ for entry in theList:
             for scriptResult in service.scripts_results:
               scriptName = c.DIM + scriptResult['id'] + ':' + c.ENDC
               scriptOutput = scriptResult['output']
+
+
+              truncated = c.DIM + '[..]' + c.ENDC
+              def hideCerts(s):
+                start = '-----BEGIN CERTIFICATE-----'
+                end = '-----END CERTIFICATE-----'
+                if start in s and end in s:
+                  pre = s.split(start)[0]
+                  post = s.split(end)[1]
+
+                  return pre + start + '\n' + truncated + '\n' + end + post
+                return s
+
+              def hideHeader(s,cc):
+                n = ''
+                cc = cc + ': '
+
+                parts = s.split(cc)
+                n = n + parts[0]
+                for i in range(1, len(parts)):
+                  lines = parts[i].split('\n')
+
+                  # remove cookie value
+                  del lines[0]
+                  n = n + cc + truncated + '\n' + '\n'.join(lines)
+
+                return n
+
+
+              if args.verbose < 4:
+                scriptOutput = hideHeader(scriptOutput, 'Set-Cookie')
+                scriptOutput = hideHeader(scriptOutput, 'Date')
+                scriptOutput = hideCerts(scriptOutput)
+
               ensureEntry(scriptName, scriptOutput, liist)
 
       def printList(liist):
