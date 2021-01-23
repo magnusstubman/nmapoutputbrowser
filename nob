@@ -23,6 +23,14 @@ class c:
   DIM = '\033[2m'
   UNDERLINE = '\033[4m'
 
+def removeColors(s):
+  for colorName in dir(c):
+    if not '_' in colorName:
+      color = getattr(c, colorName)
+      s = s.replace(color, '')
+  return s
+
+
 theList = []
 portIgnoreList = []
 verbose = 0
@@ -35,15 +43,7 @@ def parseFile(filename):
       return False
 
   def portShouldBeIgnored(port):
-    for entry in portIgnoreList:
-      if isRange(entry):
-        entry = entry.split("-")
-        if int(entry[0]) <= port[0] and int(entry[1]) >= port[0]:
-          return True
-      else:
-        if int(entry) == port[0]:
-          return True
-    return False
+    return portIgnoreList and port[0] in portIgnoreList
 
   def hasSeenPort(port):
     for entry in theList:
@@ -230,30 +230,35 @@ def parsePorts(s):
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", help="Increase verbosity - can be used twice", required=False, default=0, action='count')
-parser.add_argument("-it", "--ignore-tcpwrapped", help="hide ports which were found to be tcpwrapped. Default false", required=False, action='store_true', default=False)
+#parser.add_argument("-it", "--ignore-tcpwrapped", help="hide ports which were found to be tcpwrapped. Default false", required=False, action='store_true', default=False)
 
-#parser.add_argument('-p', '--ports', metavar='P', type=int, nargs='+', help='ports to show')
 
 
 parser.add_argument("-p", "--ports", help="Only show specific ports", required=False, action='append')
-parser.add_argument("-ip", "--ignore-port", help="silence a specific port (protocol agnostic) from output - can be used multiple times", required=False, action='append')
+parser.add_argument("-ip", "--ignore-ports", help="silence a specific port (protocol agnostic) from output - can be used multiple times", required=False, action='append')
 
 maxDifferentResults = 3
 parser.add_argument("-m", "--max-different-results", help="maximum amount of different scan results to show (when multiple scan results have different opinions about the results. Default is " + str(maxDifferentResults) + ")", required=False, type=int)
-parser.add_argument("-ipr", "--ignore-port-range", help="silence a specific port range (protocol agnostic) from output e.g. 60000-65535 - can be used multiple times", required=False, action='append')
 parser.add_argument("-t", "--targets-only", help="hide everything but targets", required=False, action='store_true', default=False)
+parser.add_argument("-ht", "--http-truncate-header", help="truncate HTTP headers. Comman separated", required=False)
 parser.add_argument("files", metavar='<nmap XML file>', nargs='+', help='nmap XML file renerated with -oX or -oA of nmap')
 args = parser.parse_args()
 
+if args.ports and args.ignore_ports:
+  err('can\'t both use -p and -ip pick one or the other!')
+
 showPorts = parsePorts(args.ports)
+portIgnoreList = parsePorts(args.ignore_ports)
 
-if args.ignore_port:
-  for entry in args.ignore_port:
-    portIgnoreList.append(entry)
+truncateHeaders = []
 
-if args.ignore_port_range:
-  for entry in args.ignore_port_range:
-    portIgnoreList.append(entry)
+if args.http_truncate_header:
+  if ',' in args.http_truncate_header:
+    truncateHeaders = args.http_truncate_header.split(',')
+  else:
+    truncateHeaders.append(args.http_truncate_header)
+
+#sys.exit(0)
 
 if args.max_different_results:
     maxDifferentResults = args.max_different_results
@@ -322,7 +327,7 @@ for entry in theList:
       if args.verbose > 1:
         if len(bannerTexts) > 1:
           if len(bannerTexts) > maxDifferentResults:
-            printI(1, address + c.WARNING + ' more than ' + str(maxDifferentResults) + ' inconclusive service detection results:' + c.ENDC)
+            printI(1, address + c.WARNING + ' more than ' + str(maxDifferentResults) + ' inconsistent service detection results:' + c.ENDC)
 
             highestCount = 0
             theOnes = []
@@ -342,7 +347,7 @@ for entry in theList:
               printI(2, str(text[0]) + ' result(s): ' + t)
 
           else:
-            printI(1, address + c.WARNING + ' inconclusive version scan results:' + c.ENDC)
+            printI(1, address + c.WARNING + ' inconsistent version scan results:' + c.ENDC)
             for text in bannerTexts:
               t = c.WARNING + text[1].replace("\n", c.ENDC + "\n" + c.WARNING) + c.ENDC
               printI(2, str(text[0]) + ' result(s): ' + t)
@@ -356,7 +361,7 @@ for entry in theList:
             if len(serviceTexts) > 1:
 
               if len(serviceTexts) > maxDifferentResults:
-                printI(1, address + c.WARNING + ' more than ' + str(maxDifferentResults) + ' inconclusive service detection results:' + c.ENDC)
+                printI(1, address + c.WARNING + ' more than ' + str(maxDifferentResults) + ' inconsistent service detection results:' + c.ENDC)
 
                 highestCount = 0
                 theOnes = []
@@ -375,7 +380,7 @@ for entry in theList:
                   t = c.WARNING +text[1].replace("\n", c.ENDC + "\n" + c.WARNING) + c.ENDC
                   printI(2, str(text[0]) + ' result(s): ' + t)
               else:
-                printI(1, address + c.WARNING + ' inconclusive service detection:' + c.ENDC)
+                printI(1, address + c.WARNING + ' inconsistent service detection:' + c.ENDC)
                 for text in serviceTexts:
                   t = c.WARNING + text[1].replace("\n", c.ENDC + "\n" + c.WARNING) + c.ENDC
                   printI(2, str(text[0]) + ' result(s): ' + t)
@@ -424,7 +429,6 @@ for entry in theList:
               scriptName = c.DIM + scriptResult['id'] + ':' + c.ENDC
               scriptOutput = scriptResult['output']
 
-
               truncated = c.DIM + '[..]' + c.ENDC
               def hideCerts(s):
                 start = '-----BEGIN CERTIFICATE-----'
@@ -432,6 +436,7 @@ for entry in theList:
                 if start in s and end in s:
                   pre = s.split(start)[0]
                   post = s.split(end)[1]
+                  truncated = c.DIM + truncated + c.ENDC
 
                   return pre + start + '\n' + truncated + '\n' + end + post
                 return s
@@ -442,19 +447,44 @@ for entry in theList:
 
                 parts = s.split(cc)
                 n = n + parts[0]
+                stuff = None
                 for i in range(1, len(parts)):
                   lines = parts[i].split('\n')
+                  
+                  if cc == 'Set-Cookie: ':
+                    cookie = lines[0]
 
-                  # remove cookie value
-                  del lines[0]
-                  n = n + cc + truncated + '\n' + '\n'.join(lines)
+                    if '=' in cookie:
+                      cookie = cookie.split('=')
+                      cookieName = cookie[0]
+                      del cookie[0]
+                      rest = '='.join(cookie)
+
+                      if ';' in rest:
+                        r = rest.split(';')
+                        del r[0]
+                        r = ';'.join(r)
+
+                        stuff = True
+                        lines[0] = cookieName + '=' + truncated + ';' + r
+                    
+                  if stuff:
+                    n = n + cc + '\n'.join(lines)
+                  else:
+                    del lines[0]
+                    n = n + cc + truncated + '\n' + '\n'.join(lines)
 
                 return n
 
 
               if args.verbose < 4:
+                global truncateHeaders
+                for header in truncateHeaders:
+                  scriptOutput = hideHeader(scriptOutput, header)
+
                 scriptOutput = hideHeader(scriptOutput, 'Set-Cookie')
                 scriptOutput = hideHeader(scriptOutput, 'Date')
+                scriptOutput = hideHeader(scriptOutput, 'X-FB-Debug')
                 scriptOutput = hideCerts(scriptOutput)
 
               ensureEntry(scriptName, scriptOutput, liist)
@@ -474,6 +504,7 @@ for entry in theList:
             for result in entryResultsList:
               resultCount = result[0]
               resultOutput = result[1]
+              resultOutput = removeColors(resultOutput)
               resultOutput = c.WARNING + resultOutput.replace("\n", c.ENDC + "\n" + c.WARNING) + c.ENDC
 
               if resultCount > highestCount:
@@ -497,6 +528,7 @@ for entry in theList:
             for result in entryResultsList:
               resultCount = result[0]
               resultOutput = result[1]
+              resultOutput = removeColors(resultOutput)
               resultOutput = resultOutput.replace("\n", c.ENDC + "\n" + c.WARNING) + c.ENDC
               printI(3, str(resultCount) + ' result(s): ' + resultOutput)
 
