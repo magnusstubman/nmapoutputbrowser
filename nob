@@ -278,7 +278,7 @@ for entry in args.files:
   try:
     parseFile(entry)
   except:
-    print(entry + " could not be parsed. Skipping file.", file=sys.stderr)
+    print(entry + " could not be parsed. Skipped.", file=sys.stderr)
     pass
 
 # sort
