@@ -34,6 +34,8 @@ def removeColors(s):
 theList = []
 portIgnoreList = []
 verbose = 0
+listThe = []
+
 
 def parseFile(filename):
   def isRange(maybeRange):
@@ -76,10 +78,45 @@ def parseFile(filename):
           else:
             addNewPort(port, host)
 
+  # command stuff
+  def hasSeenHost(host):
+    for entry in listThe:
+      if entry[0] == host:
+        return True
+    return False
+  
+  def hostHasPort(host, p):
+    for entry in listThe:
+      if entry[0] == host:
+        for port in entry[1]:
+          if port == p:
+            return True
+    return False
+
+  def appendPort(host, p):
+    for entry in listThe:
+      if entry[0] == host:
+        entry[1].append(p)
+
+  def appendHost(host):
+    listThe.append((host,[]))
+
+  for host in nmap_report.hosts:
+    ports = host.get_open_ports()
+    if len(ports) > 0:
+      for port in ports:
+        if not hostHasPort(host.address, port):
+          if not hasSeenHost(host.address):
+            appendHost(host.address)
+          appendPort(host.address, port)
+
+
+
+
 def pprint_tree(node, file=None, _prefix="", _last=True, _first=False, something=False):
   if not node:
     return
-  if not args.targets_only:
+  if (not args.targets_only) and (not args.command):
     if not node.value:
       node.value = ''
 
@@ -199,7 +236,7 @@ def printArray(arr):
 
 tree = None
 def printI(ind, string):
-  if not args.targets_only:
+  if (not args.targets_only) and (not args.command):
     ind = ind - 1 
     o = tree
     for a in range(0,ind):
@@ -241,11 +278,16 @@ maxDifferentResults = 3
 parser.add_argument("-m", "--max-different-results", help="maximum amount of different scan results to show (when multiple scan results have different opinions about the results. Default is " + str(maxDifferentResults) + ")", required=False, type=int)
 parser.add_argument("-t", "--targets-only", help="hide everything but targets", required=False, action='store_true', default=False)
 parser.add_argument("-ht", "--http-truncate-header", help="truncate HTTP headers. Comman separated", required=False)
+parser.add_argument("-c", "--command", help="print basic commands needed to rescan", required=False, action='store_true', default=False)
+parser.add_argument("-cf", "--command-flags", help=" nmap arguments to add to nmap commands. '@@' will be replaced by host address", required=False, action='store', type=str)
 parser.add_argument("files", metavar='<nmap XML file>', nargs='+', help='nmap XML file renerated with -oX or -oA of nmap')
 args = parser.parse_args()
 
 if args.ports and args.ignore_ports:
   err('can\'t both use -p and -ip pick one or the other!')
+
+if args.command_flags and not args.command:
+  args.command = True
 
 showPorts = parsePorts(args.ports)
 portIgnoreList = parsePorts(args.ignore_ports)
@@ -270,8 +312,9 @@ def addTarget(target):
       return
   targets.append(target)
 
-if args.targets_only:
+if args.targets_only or args.command:
   args.verbose = 1
+
 
 # parse
 for entry in args.files:
@@ -283,6 +326,7 @@ for entry in args.files:
 
 # sort
 theList = sorted(theList, key=lambda tup: tup[0])
+listThe = sorted(listThe, key=lambda tup: tup[0])
 
 # print
 first = True
@@ -436,7 +480,6 @@ for entry in theList:
                 if start in s and end in s:
                   pre = s.split(start)[0]
                   post = s.split(end)[1]
-                  truncated = c.DIM + truncated + c.ENDC
 
                   return pre + start + '\n' + truncated + '\n' + end + post
                 return s
@@ -547,3 +590,49 @@ if args.targets_only:
   for target in targets:
     print(target)
 
+if args.command:
+  for entry in listThe:
+    tcpList = []
+    udpList = []
+
+    for port in entry[1]:
+      if port[1] == 'tcp':
+        tcpList.append(port[0])
+      if port[1] == 'udp':
+        udpList.append(port[0])
+    
+    s = ''
+    if len(tcpList) > 0:
+      s += ' -sS'
+    if len(udpList) > 0:
+      s += ' -sU'
+
+    s += ' -p'
+    if len(tcpList) > 0:
+      first = True
+      for port in tcpList:
+        if first:
+          first = False
+          s += 'T:'
+        else:
+          s += ','
+        s += str(port)
+
+    if len(udpList) > 0:
+      if len(tcpList) > 0:
+        s += ','
+      first = True
+      for port in udpList:
+        if first:
+          first = False
+          s += 'U:'
+        else:
+          s += ','
+        s += str(port)
+
+    s = 'sudo nmap ' + entry[0] + s 
+    if args.command_flags:
+      s += ' ' + args.command_flags
+      s = s.replace('@@', entry[0])
+
+    print(s)
