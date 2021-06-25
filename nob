@@ -35,6 +35,16 @@ theList = []
 portIgnoreList = []
 verbose = 0
 listThe = []
+showTargets = []
+
+
+def showThisTarget(t):
+  if showTargets and len(showTargets) > 0:
+    for target in showTargets:
+      if t == target:
+        return True
+    return False
+  return True 
 
 
 def parseFile(filename):
@@ -68,15 +78,16 @@ def parseFile(filename):
 
   nmap_report = NmapParser.parse_fromfile(filename)
   for host in nmap_report.hosts:
-    ports = host.get_open_ports()
+    if showThisTarget(host.address): 
+      ports = host.get_open_ports()
 
-    if ports:
-      for port in ports:
-        if not portShouldBeIgnored(port):
-          if hasSeenPort(port):
-            appendAlreadySeenPort(port, host)
-          else:
-            addNewPort(port, host)
+      if ports:
+        for port in ports:
+          if not portShouldBeIgnored(port):
+            if hasSeenPort(port):
+              appendAlreadySeenPort(port, host)
+            else:
+              addNewPort(port, host)
 
   # command stuff
   def hasSeenHost(host):
@@ -102,13 +113,14 @@ def parseFile(filename):
     listThe.append((host,[]))
 
   for host in nmap_report.hosts:
-    ports = host.get_open_ports()
-    if len(ports) > 0:
-      for port in ports:
-        if not hostHasPort(host.address, port):
-          if not hasSeenHost(host.address):
-            appendHost(host.address)
-          appendPort(host.address, port)
+    if showThisTarget(host.address): 
+      ports = host.get_open_ports()
+      if len(ports) > 0:
+        for port in ports:
+          if not hostHasPort(host.address, port):
+            if not hasSeenHost(host.address):
+              appendHost(host.address)
+            appendPort(host.address, port)
 
 
 
@@ -263,20 +275,34 @@ def parsePorts(s):
 
   return sorted(ports)
 
+def parseTargets(s):
+  if not s:
+    return None
+
+  targets = []
+
+  for entry in s:
+    if ('/' in entry) or ('-' in entry):
+      err('your target specification is not supported. Only comma seperated entries are allowed. No CIDR or range (yet)')
+
+    parts = entry.split(',')
+
+    for part in parts:
+      targets.append(part)
+
+  return targets
+
   
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", help="Increase verbosity - can be used twice", required=False, default=0, action='count')
-#parser.add_argument("-it", "--ignore-tcpwrapped", help="hide ports which were found to be tcpwrapped. Default false", required=False, action='store_true', default=False)
-
-
-
+parser.add_argument("-t", "--targets", help="Only show specific targets", required=False, action='append')
 parser.add_argument("-p", "--ports", help="Only show specific ports", required=False, action='append')
 parser.add_argument("-ip", "--ignore-ports", help="silence a specific port (protocol agnostic) from output - can be used multiple times", required=False, action='append')
 
 maxDifferentResults = 3
 parser.add_argument("-m", "--max-different-results", help="maximum amount of different scan results to show (when multiple scan results have different opinions about the results. Default is " + str(maxDifferentResults) + ")", required=False, type=int)
-parser.add_argument("-t", "--targets-only", help="hide everything but targets", required=False, action='store_true', default=False)
+parser.add_argument("-to", "--targets-only", help="hide everything but targets", required=False, action='store_true', default=False)
 parser.add_argument("-ht", "--http-truncate-header", help="truncate HTTP headers. Comman separated", required=False)
 parser.add_argument("-c", "--command", help="print basic commands needed to rescan", required=False, action='store_true', default=False)
 parser.add_argument("-cf", "--command-flags", help=" nmap arguments to add to nmap commands. '@@' will be replaced by host address", required=False, action='store', type=str)
@@ -289,6 +315,7 @@ if args.ports and args.ignore_ports:
 if args.command_flags and not args.command:
   args.command = True
 
+showTargets = parseTargets(args.targets)
 showPorts = parsePorts(args.ports)
 portIgnoreList = parsePorts(args.ignore_ports)
 
@@ -299,8 +326,6 @@ if args.http_truncate_header:
     truncateHeaders = args.http_truncate_header.split(',')
   else:
     truncateHeaders.append(args.http_truncate_header)
-
-#sys.exit(0)
 
 if args.max_different_results:
     maxDifferentResults = args.max_different_results
