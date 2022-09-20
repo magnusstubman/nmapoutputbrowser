@@ -378,6 +378,15 @@ for entry in theList:
   if args.verbose > 0:
     for host in entry[1]:
       address = host[0]
+
+      if len(host) >= 2:
+        if host[1][0].hostnames:
+          if len(host[1][0].hostnames) > 0:
+            if args.verbose > 1:
+              address = host[1][0].hostnames[0] + ' (' + address + ')'
+            else:
+              address = host[1][0].hostnames[0]
+
       addTarget(address)
 
       def addText(newText, texts):
